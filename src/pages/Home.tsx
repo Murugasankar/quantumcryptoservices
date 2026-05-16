@@ -1,5 +1,6 @@
 import Navbar from "../components/Navbar";
 import ParticlesBackground from "../components/ParticlesBackground";
+import { motion } from "framer-motion";
 
 function Home() {
   return (
@@ -20,8 +21,12 @@ function Home() {
 
 
 
-        <h1 className="text-5xl md:text-7xl font-extrabold leading-tight max-w-5xl">
-
+<motion.h1
+  initial={{ opacity: 0, y: 40 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 1 }}
+  className="text-4xl sm:text-5xl md:text-7xl font-extrabold leading-tight max-w-5xl"
+>
           Securing Today.
 
           <br />
@@ -30,8 +35,7 @@ function Home() {
             Preparing for Tomorrow.
           </span>
 
-        </h1>
-
+</motion.h1>
         <p className="mt-10 max-w-3xl text-xl text-gray-300 leading-relaxed">
 
           Quantum Crypto Services delivers trusted SSL
@@ -170,36 +174,88 @@ function Home() {
       </section>
 
       {/* SSL CHECKER */}
-      <section className="px-6 md:px-20 py-24">
+<section className="px-6 md:px-20 py-24">
 
-        <h2 className="text-5xl font-bold text-cyan-400 text-center">
-          SSL Certificate Checker
-        </h2>
+  <h2 className="text-5xl font-bold text-cyan-400 text-center">
+    SSL Certificate Checker
+  </h2>
 
-        <p className="text-center text-gray-300 text-2xl mt-8">
+  <p className="text-center text-gray-300 text-2xl mt-8">
 
-          Analyze SSL certificate configuration
-          and security posture for any public domain.
+    Analyze SSL certificate configuration
+    and security posture for any public domain.
 
+  </p>
+
+  <div className="bg-[#081028] border border-cyan-900/30 rounded-3xl p-10 mt-16 max-w-3xl mx-auto">
+
+    <input
+      type="text"
+      placeholder="Enter domain name (example.com)"
+      className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-6 py-5 text-xl outline-none focus:border-cyan-400"
+    />
+
+    <button
+      className="mt-8 bg-cyan-500 hover:bg-cyan-600 text-black px-10 py-4 rounded-2xl font-bold text-lg transition"
+    >
+
+      Check SSL
+
+    </button>
+
+    {/* RESULT CARD */}
+    <div className="mt-10 bg-[#0f172a] rounded-2xl p-8 border border-cyan-900/20">
+
+      <h3 className="text-2xl font-bold text-cyan-400 mb-6">
+
+        SSL Report
+
+      </h3>
+
+      <div className="space-y-4 text-gray-300 text-lg">
+
+        <p>
+          Domain:
+          <span className="text-white ml-2">
+            example.com
+          </span>
         </p>
 
-        <div className="bg-[#081028] border border-cyan-900/30 rounded-3xl p-10 mt-16 max-w-3xl mx-auto">
+        <p>
+          SSL Status:
+          <span className="text-green-400 ml-2">
+            Secure
+          </span>
+        </p>
 
-          <input
-            type="text"
-            placeholder="Enter domain name"
-            className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-6 py-5 text-xl outline-none"
-          />
+        <p>
+          Issuer:
+          <span className="text-white ml-2">
+            Let's Encrypt
+          </span>
+        </p>
 
-          <button className="mt-8 bg-cyan-500 hover:bg-cyan-600 text-black px-10 py-4 rounded-2xl font-bold text-lg">
+        <p>
+          Expiry Date:
+          <span className="text-white ml-2">
+            Dec 12, 2026
+          </span>
+        </p>
 
-            Check SSL
+        <p>
+          TLS Version:
+          <span className="text-white ml-2">
+            TLS 1.3
+          </span>
+        </p>
 
-          </button>
+      </div>
 
-        </div>
+    </div>
 
-      </section>
+  </div>
+
+</section>
 
       {/* OUR VISION */}
       <section className="px-6 md:px-20 py-24">

@@ -1,1 +1,89 @@
 @import "tailwindcss";
+/* QCS Cyber Dissolve Animation */
+
+@keyframes cyberFlyIn {
+
+  0% {
+    transform:
+      translate(420px, 60px)
+      rotate(540deg)
+      scale(0.1);
+
+    opacity: 0;
+    filter: blur(12px);
+  }
+
+  20% {
+    transform:
+      translate(300px, -30px)
+      rotate(400deg)
+      scale(0.4);
+
+    opacity: 0.3;
+    filter: blur(8px);
+  }
+
+  40% {
+    transform:
+      translate(180px, 25px)
+      rotate(240deg)
+      scale(0.7);
+
+    opacity: 0.6;
+    filter: blur(4px);
+  }
+
+  60% {
+    transform:
+      translate(80px, -15px)
+      rotate(120deg)
+      scale(1.05);
+
+    opacity: 0.9;
+    filter: blur(1px);
+  }
+
+  80% {
+    transform:
+      translate(-10px, 8px)
+      rotate(-20deg)
+      scale(1.02);
+
+    opacity: 1;
+    filter: blur(0px);
+  }
+
+  100% {
+    transform:
+      translate(0px, 0px)
+      rotate(0deg)
+      scale(1);
+
+    opacity: 1;
+    filter: blur(0px);
+  }
+
+}
+
+
+/* Q */
+.animate-q {
+  display: inline-block;
+  animation: cyberFlyIn 3s ease forwards;
+}
+
+
+/* C */
+.animate-c {
+  display: inline-block;
+  animation: cyberFlyIn 3s ease forwards;
+  animation-delay: 0.8s;
+}
+
+
+/* S */
+.animate-s {
+  display: inline-block;
+  animation: cyberFlyIn 3s ease forwards;
+  animation-delay: 1.6s;
+}
