@@ -1,10 +1,77 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { ShoppingCart } from "lucide-react";
+
 import logo from "../assets/qcs logo.png.png";
+import { auth } from "../firebase";
 
 function Navbar() {
 
+  const navigate = useNavigate();
+
+  const location = useLocation();
+
+  const cartRef = useRef<HTMLDivElement>(null);
+
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const [cartOpen, setCartOpen] = useState(false);
+
+  const user = auth.currentUser;
+
+  const storedUser = localStorage.getItem("qcsUser");
+
+  const parsedUser = storedUser
+    ? JSON.parse(storedUser)
+    : null;
+
+  const [cartItems, setCartItems] = useState<string[]>(
+    JSON.parse(
+      localStorage.getItem("qcsCart") || "[]"
+    )
+  );
+
+  const handleLogout = async () => {
+
+    localStorage.removeItem("qcsUser");
+
+    await signOut(auth);
+
+    navigate("/");
+
+  };
+
+  useEffect(() => {
+
+    const handleClickOutside = (event: MouseEvent) => {
+
+      if (
+        cartRef.current &&
+        !cartRef.current.contains(event.target as Node)
+      ) {
+
+        setCartOpen(false);
+
+      }
+
+    };
+
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+
+    return () => {
+
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+
+    };
+
+  }, []);
 
   return (
 
@@ -26,20 +93,13 @@ function Navbar() {
 
           <div className="min-w-0">
 
-            {/* QCS Animated */}
             <h1 className="text-2xl sm:text-3xl font-extrabold text-cyan-400 tracking-wide flex">
 
-              <span className="animate-q">
-                Q
-              </span>
+              <span className="animate-q">Q</span>
 
-              <span className="animate-c">
-                C
-              </span>
+              <span className="animate-c">C</span>
 
-              <span className="animate-s">
-                S
-              </span>
+              <span className="animate-s">S</span>
 
             </h1>
 
@@ -56,61 +116,266 @@ function Navbar() {
         {/* DESKTOP MENU */}
         <div className="hidden lg:flex items-center gap-10 text-sm font-semibold">
 
-          {/* Main Navigation */}
+          {/* NAVIGATION */}
           <div className="flex items-center gap-8">
 
             <Link
               to="/"
-              className="hover:text-cyan-400 transition duration-300"
+              className={`transition duration-300 cursor-pointer ${
+                location.pathname === "/"
+                  ? "text-cyan-400"
+                  : "hover:text-cyan-400"
+              }`}
             >
               Home
             </Link>
 
             <Link
               to="/services"
-              className="hover:text-cyan-400 transition duration-300"
+              className={`transition duration-300 cursor-pointer ${
+                location.pathname === "/services"
+                  ? "text-cyan-400"
+                  : "hover:text-cyan-400"
+              }`}
             >
               Services
             </Link>
 
             <Link
               to="/pricing"
-              className="hover:text-cyan-400 transition duration-300"
+              className={`transition duration-300 cursor-pointer ${
+                location.pathname === "/pricing"
+                  ? "text-cyan-400"
+                  : "hover:text-cyan-400"
+              }`}
             >
               Pricing
             </Link>
 
             <Link
               to="/contact"
-              className="hover:text-cyan-400 transition duration-300"
+              className={`transition duration-300 cursor-pointer ${
+                location.pathname === "/contact"
+                  ? "text-cyan-400"
+                  : "hover:text-cyan-400"
+              }`}
             >
               Contact
             </Link>
 
           </div>
 
-          {/* Auth Buttons */}
-          <div className="flex items-center gap-4 ml-4">
+          {/* RIGHT SIDE */}
+          <div className="flex items-center gap-6 relative">
 
-            <Link
-              to="/login"
-              className="hover:text-cyan-400 transition duration-300"
+            {/* CART */}
+            <div
+              ref={cartRef}
+              className="relative"
             >
-              Login
-            </Link>
 
-            <Link
-              to="/register"
-              className="bg-cyan-500 hover:bg-cyan-600 text-black px-5 py-2 rounded-xl transition duration-300 font-bold"
-            >
-              Register
-            </Link>
+              <button
+                onClick={() => setCartOpen(!cartOpen)}
+                className="relative cursor-pointer"
+              >
+
+                <ShoppingCart className="w-6 h-6 text-white hover:text-cyan-400 transition duration-300" />
+
+                <span className="absolute -top-2 -right-2 bg-cyan-500 text-black text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+
+                  {cartItems.length}
+
+                </span>
+
+              </button>
+
+              {/* CART POPUP */}
+              {cartOpen && (
+
+                <div className="absolute top-14 right-0 w-72 bg-[#081028] border border-cyan-900/30 rounded-2xl shadow-2xl p-5 z-50">
+
+                  {cartItems.length === 0 ? (
+
+                    <p className="text-gray-400">
+
+                      Your cart is empty
+
+                    </p>
+
+                  ) : (
+
+                    <>
+
+                      <div className="flex flex-col gap-3">
+
+                        {Object.entries(
+
+                          cartItems.reduce(
+                            (acc: any, item: string) => {
+
+                              acc[item] = (acc[item] || 0) + 1;
+
+                              return acc;
+
+                            },
+                            {}
+                          )
+
+                        ).map(([item, quantity]: any) => (
+
+                          <div
+                            key={item}
+                            className="bg-[#0f172a] px-4 py-3 rounded-xl flex items-center justify-between gap-4"
+                          >
+
+                            {/* SERVICE NAME */}
+                            <p className="text-sm text-white">
+
+                              {item}
+
+                            </p>
+
+                            {/* QUANTITY */}
+                            <div className="flex items-center gap-4">
+
+                              {/* MINUS */}
+                              <button
+                                onClick={() => {
+
+                                  let updatedCart = [...cartItems];
+
+                                  const index = updatedCart.indexOf(item);
+
+                                  if (index > -1) {
+
+                                    updatedCart.splice(index, 1);
+
+                                  }
+
+                                  localStorage.setItem(
+                                    "qcsCart",
+                                    JSON.stringify(updatedCart)
+                                  );
+
+                                  setCartItems(updatedCart);
+
+                                }}
+                                className="text-red-400 hover:text-red-500 text-xl font-bold cursor-pointer transition"
+                              >
+
+                                -
+
+                              </button>
+
+                              {/* COUNT */}
+                              <span className="text-cyan-400 font-bold min-w-[20px] text-center">
+
+                                {quantity}
+
+                              </span>
+
+                              {/* PLUS */}
+                              <button
+                                onClick={() => {
+
+                                  const updatedCart = [...cartItems, item];
+
+                                  localStorage.setItem(
+                                    "qcsCart",
+                                    JSON.stringify(updatedCart)
+                                  );
+
+                                  setCartItems(updatedCart);
+
+                                }}
+                                className="text-cyan-400 hover:text-cyan-300 text-xl font-bold cursor-pointer transition"
+                              >
+
+                                +
+
+                              </button>
+
+                            </div>
+
+                          </div>
+
+                        ))}
+
+                      </div>
+
+                      {/* CHECKOUT */}
+                      <button
+                        onClick={() => navigate("/checkout")}
+                        className="w-full mt-5 bg-cyan-500 hover:bg-cyan-600 text-black py-3 rounded-xl font-bold transition duration-300 cursor-pointer"
+                      >
+
+                        Checkout
+
+                      </button>
+
+                    </>
+
+                  )}
+
+                </div>
+
+              )}
+
+            </div>
+
+            {/* USER */}
+            {user ? (
+
+              <div className="flex items-center gap-4">
+
+                <p className="text-cyan-400 font-semibold">
+
+                  Hi {parsedUser?.firstName || "User"}
+
+                </p>
+
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-xl transition duration-300 font-semibold cursor-pointer"
+                >
+
+                  Logout
+
+                </button>
+
+              </div>
+
+            ) : (
+
+              <div className="flex items-center gap-4">
+
+                <Link
+                  to="/login"
+                  className={`transition duration-300 cursor-pointer ${
+                    location.pathname === "/login"
+                      ? "text-cyan-400"
+                      : "hover:text-cyan-400"
+                  }`}
+                >
+                  Login
+                </Link>
+
+                <Link
+                  to="/register"
+                  className="bg-cyan-500 hover:bg-cyan-600 text-black px-5 py-2 rounded-xl font-semibold transition duration-300 cursor-pointer"
+                >
+                  Register
+                </Link>
+
+              </div>
+
+            )}
 
           </div>
 
         </div>
 
-        {/* MOBILE BUTTON */}
+        {/* MOBILE MENU BUTTON */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="lg:hidden flex flex-col gap-1 ml-3"
@@ -135,73 +400,6 @@ function Navbar() {
           ></span>
 
         </button>
-
-      </div>
-
-      {/* MOBILE MENU */}
-      <div
-        className={`lg:hidden overflow-hidden transition-all duration-500 ${
-          menuOpen
-            ? "max-h-[500px] opacity-100"
-            : "max-h-0 opacity-0"
-        }`}
-      >
-
-        <div className="flex flex-col px-6 py-6 gap-5 bg-[#050816]/95 border-t border-cyan-900/20 text-base font-medium">
-
-          <Link
-            to="/"
-            onClick={() => setMenuOpen(false)}
-            className="hover:text-cyan-400 transition"
-          >
-            Home
-          </Link>
-
-          <Link
-            to="/services"
-            onClick={() => setMenuOpen(false)}
-            className="hover:text-cyan-400 transition"
-          >
-            Services
-          </Link>
-
-          <Link
-            to="/pricing"
-            onClick={() => setMenuOpen(false)}
-            className="hover:text-cyan-400 transition"
-          >
-            Pricing
-          </Link>
-
-          <Link
-            to="/contact"
-            onClick={() => setMenuOpen(false)}
-            className="hover:text-cyan-400 transition"
-          >
-            Contact
-          </Link>
-
-          <div className="border-t border-cyan-900/20 pt-5 flex flex-col gap-4">
-
-            <Link
-              to="/login"
-              onClick={() => setMenuOpen(false)}
-              className="hover:text-cyan-400 transition"
-            >
-              Login
-            </Link>
-
-            <Link
-              to="/register"
-              onClick={() => setMenuOpen(false)}
-              className="bg-cyan-500 hover:bg-cyan-600 text-black px-5 py-3 rounded-xl transition duration-300 font-bold text-center"
-            >
-              Register
-            </Link>
-
-          </div>
-
-        </div>
 
       </div>
 

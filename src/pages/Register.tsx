@@ -1,6 +1,68 @@
+import { useState } from "react";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase";
+import { useNavigate, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import { Navigate } from "react-router-dom";
 
 function Register() {
+
+  const navigate = useNavigate();
+  const [firstName, setFirstName] = useState("");
+
+const [lastName, setLastName] = useState("");
+
+const [phone, setPhone] = useState("");
+
+  const [email, setEmail] = useState("");
+
+  const [password, setPassword] = useState("");
+
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async () => {
+
+    if (!email || !password) {
+
+      alert("Please fill all fields");
+
+      return;
+    }
+
+    try {
+
+      setLoading(true);
+
+      localStorage.setItem(
+  "qcsUser",
+  JSON.stringify({
+    firstName,
+    lastName,
+    phone,
+    email
+  })
+);
+
+      navigate("/dashboard");
+
+    } catch (error: any) {
+
+      console.error(error);
+
+      alert(error.message);
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  };
+  if (auth.currentUser) {
+
+  return <Navigate to="/dashboard" />;
+
+}
 
   return (
 
@@ -19,30 +81,75 @@ function Register() {
           </h1>
 
           <div className="space-y-6">
+            <input
+  type="text"
+  placeholder="First Name"
+  value={firstName}
+  onChange={(e) => setFirstName(e.target.value)}
+  className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
+/>
+<input
+  type="text"
+  placeholder="Last Name"
+  value={lastName}
+  onChange={(e) => setLastName(e.target.value)}
+  className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
+/>
+<input
+  type="tel"
+  placeholder="Phone Number"
+  value={phone}
+  onChange={(e) => setPhone(e.target.value)}
+  className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
+/>
 
             <input
-              type="text"
-              placeholder="Full Name"
-              className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none focus:border-cyan-400"
-            />
+  type="email"
+  placeholder="Email Address"
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === "Enter") {
+      handleRegister();
+    }
+  }}
+  className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
+/>
 
-            <input
-              type="email"
-              placeholder="Email Address"
-              className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none focus:border-cyan-400"
-            />
+           <input
+  type="password"
+  placeholder="Password"
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === "Enter") {
+      handleRegister();
+    }
+  }}
+  className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
+/>
 
-            <input
-              type="password"
-              placeholder="Password"
-              className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none focus:border-cyan-400"
-            />
+            <button
+              onClick={handleRegister}
+              disabled={loading}
+className="w-full bg-cyan-500 hover:bg-cyan-600 text-black py-4 rounded-2xl font-bold text-lg transition cursor-pointer"            >
 
-            <button className="w-full bg-cyan-500 hover:bg-cyan-600 text-black py-4 rounded-2xl font-bold text-lg transition">
-
-              Create Account
+              {loading ? "Creating..." : "Create Account"}
 
             </button>
+
+            <p className="text-center text-gray-400">
+
+              Already have account?
+
+              <Link
+                to="/login"
+                className="text-cyan-400 ml-2"
+              >
+                Login
+              </Link>
+
+            </p>
 
           </div>
 

@@ -1,8 +1,62 @@
+import { useState } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase";
+import { useNavigate, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import { Navigate } from "react-router-dom";
 
 function Login() {
 
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+
+  const [password, setPassword] = useState("");
+
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+
+    if (!email || !password) {
+
+      alert("Please fill all fields");
+
+      return;
+    }
+    
+
+    try {
+
+      setLoading(true);
+
+      await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      navigate("/dashboard");
+
+    } catch (error: any) {
+
+      console.error(error);
+
+      alert(error.message);
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  };
+if (auth.currentUser) {
+
+  return <Navigate to="/dashboard" />;
+
+}
   return (
+    
 
     <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#050816] to-[#0f172a] text-white">
 
@@ -21,22 +75,53 @@ function Login() {
           <div className="space-y-6">
 
             <input
-              type="email"
-              placeholder="Email Address"
-              className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none focus:border-cyan-400"
-            />
+  type="email"
+  placeholder="Email Address"
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === "Enter") {
+      handleLogin();
+    }
+  }}
+  className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
+/>
 
-            <input
-              type="password"
-              placeholder="Password"
-              className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none focus:border-cyan-400"
-            />
+           <input
+  type="password"
+  placeholder="Password"
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === "Enter") {
+      handleLogin();
+    }
+  }}
+  className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
+/>
 
-            <button className="w-full bg-cyan-500 hover:bg-cyan-600 text-black py-4 rounded-2xl font-bold text-lg transition">
+<button
+  onClick={handleLogin}
+  disabled={loading}
+  className="w-full bg-cyan-500 hover:bg-cyan-600 text-black py-4 rounded-2xl font-bold text-lg transition cursor-pointer"
+>
 
-              Login
+  {loading ? "Logging in..." : "Login"}
 
-            </button>
+</button>
+
+            <p className="text-center text-gray-400">
+
+              No account?
+
+              <Link
+                to="/register"
+                className="text-cyan-400 ml-2"
+              >
+                Register
+              </Link>
+
+            </p>
 
           </div>
 
