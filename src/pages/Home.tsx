@@ -1,4 +1,5 @@
 import Navbar from "../components/Navbar";
+import ParticlesBackground from "../components/ParticlesBackground";
 
 function Home() {
   return (
@@ -8,7 +9,16 @@ function Home() {
       <Navbar />
 
       {/* HERO */}
-      <section className="relative flex flex-col items-center justify-center text-center px-6 py-28">
+      <section className="relative overflow-hidden flex flex-col items-center justify-center text-center px-6 py-28">
+
+  {/* Animated Background */}
+  <ParticlesBackground />
+
+  {/* Content */}
+  
+  <div className="relative z-10 flex flex-col items-center">
+
+
 
         <h1 className="text-5xl md:text-7xl font-extrabold leading-tight max-w-5xl">
 
@@ -48,6 +58,7 @@ function Home() {
 
           </a>
 
+        </div>
         </div>
 
       </section>
