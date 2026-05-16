@@ -53,7 +53,7 @@ function Navbar() {
         </Link>
 
         <Link
-          to="#"
+          to="/contact"
           className="hover:text-cyan-400 transition"
         >
           Contact
