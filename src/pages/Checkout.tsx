@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+
 import { onAuthStateChanged } from "firebase/auth";
+
 import {
   addDoc,
   collection,
-  serverTimestamp
+  serverTimestamp,
 } from "firebase/firestore";
 
 import { db, auth } from "../firebase";
@@ -14,47 +16,55 @@ function Checkout() {
 
   const navigate = useNavigate();
 
-  const paymentRef = useRef<HTMLDivElement>(null);
-  const [showPayment, setShowPayment] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const paymentRef =
+    useRef<HTMLDivElement>(null);
 
-const savedData = JSON.parse(
-  localStorage.getItem("checkoutData") || "{}"
-);
+  const [showPayment, setShowPayment] =
+    useState(false);
 
-const [firstName, setFirstName] = useState(
-  savedData.firstName || ""
-);
+  const [isLoggedIn, setIsLoggedIn] =
+    useState(false);
 
-const [lastName, setLastName] = useState(
-  savedData.lastName || ""
-);
+  /* PREFILL CHECKOUT DATA */
+  const savedData = JSON.parse(
+    localStorage.getItem(
+      "checkoutData"
+    ) || "{}"
+  );
 
-const [email, setEmail] = useState(
-  savedData.email || ""
-);
+  const [firstName, setFirstName] =
+    useState(savedData.firstName || "");
 
-const [phone, setPhone] = useState(
-  savedData.phone || ""
-);
+  const [lastName, setLastName] =
+    useState(savedData.lastName || "");
 
-const [address, setAddress] = useState(
-  savedData.address || ""
-);
+  const [email, setEmail] =
+    useState(savedData.email || "");
+
+  const [phone, setPhone] =
+    useState(savedData.phone || "");
+
+  const [address, setAddress] =
+    useState(savedData.address || "");
+
+  /* CART */
   const cartItems: string[] = JSON.parse(
     localStorage.getItem("qcsCart") || "[]"
   );
 
+  /* SERVICE PRICES */
   const servicePrices: any = {
     "SSL Security": 4999,
     "Web Hosting": 9999,
     "AI Protection": 14999,
   };
 
+  /* GROUP ITEMS */
   const groupedItems = cartItems.reduce(
     (acc: any, item: string) => {
 
-      acc[item] = (acc[item] || 0) + 1;
+      acc[item] =
+        (acc[item] || 0) + 1;
 
       return acc;
 
@@ -62,424 +72,564 @@ const [address, setAddress] = useState(
     {}
   );
 
-  const total = Object.entries(groupedItems).reduce(
-    (sum: number, [item, qty]: any) => {
+  /* TOTAL */
+  const total = Object.entries(
+    groupedItems
+  ).reduce(
+    (
+      sum: number,
+      [item, qty]: any
+    ) => {
 
-      return sum + servicePrices[item] * qty;
+      return (
+        sum +
+        servicePrices[item] * qty
+      );
 
     },
     0
   );
- useEffect(() => {
 
-  const unsubscribe = onAuthStateChanged(
-    auth,
-    (user) => {
+  /* AUTH STATE */
+  useEffect(() => {
 
-      const loggedIn = !!user;
+    const unsubscribe =
+      onAuthStateChanged(
+        auth,
+        (user) => {
 
-      setIsLoggedIn(loggedIn);
+          const loggedIn = !!user;
 
-      // AUTO OPEN PAYMENT AFTER REGISTER
-      const redirect =
-        new URLSearchParams(window.location.search)
-          .get("redirect");
+          setIsLoggedIn(loggedIn);
 
-      if (loggedIn && redirect === "checkout") {
+          /* AUTO OPEN PAYMENT AFTER REGISTER */
+          const redirect =
+            new URLSearchParams(
+              window.location.search
+            ).get("redirect");
 
-        setShowPayment(true);
+          if (
+            loggedIn &&
+            redirect === "checkout"
+          ) {
 
-        setTimeout(() => {
+            setShowPayment(true);
 
-          paymentRef.current?.scrollIntoView({
-            behavior: "smooth",
-          });
+            setTimeout(() => {
 
-        }, 300);
+              paymentRef.current?.scrollIntoView({
+                behavior: "smooth",
+              });
+
+            }, 300);
+
+          }
+
+        }
+      );
+
+    return () => unsubscribe();
+
+  }, []);
+
+  /* PROCEED PAYMENT */
+  const handleProceedPayment = () => {
+
+    /* SAVE FORM DATA */
+    localStorage.setItem(
+      "checkoutData",
+      JSON.stringify({
+        firstName,
+        lastName,
+        email,
+        phone,
+        address,
+      })
+    );
+
+    /* LOGIN CHECK */
+    if (!isLoggedIn) {
+
+      const confirmRegister =
+        window.confirm(
+          "Oops! You don't have an account.\n\nFor better security and order tracking, please create an account first."
+        );
+
+      if (confirmRegister) {
+
+        navigate(
+          "/register?redirect=checkout"
+        );
 
       }
 
-    }
-  );
-
-  return () => unsubscribe();
-
-}, []);
-
-const handleProceedPayment = () => {
-
-  // SAVE FORM DATA
-  localStorage.setItem(
-    "checkoutData",
-    JSON.stringify({
-firstName,
-lastName,      email,
-      phone,
-      address,
-    })
-  );
-
-  // USER NOT LOGGED IN
- if (!isLoggedIn) {
-
-    const confirmRegister = window.confirm(
-      "Oops! You don't have an account.\n\nFor better security and order tracking, please create an account first."
-    );
-
-    if (confirmRegister) {
-
-      navigate("/register?redirect=checkout");
+      return;
 
     }
 
-    return;
+    /* SHOW PAYMENT */
+    setShowPayment(true);
 
-  }
+    setTimeout(() => {
 
-  // USER LOGGED IN
-  setShowPayment(true);
+      paymentRef.current?.scrollIntoView({
+        behavior: "smooth",
+      });
 
-  setTimeout(() => {
+    }, 100);
 
-    paymentRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
+  };
 
-  }, 100);
+  /* COMPLETE PAYMENT */
+  const handleCompletePayment =
+    async () => {
 
-};
+      try {
 
-  const handleCompletePayment = async () => {
-  try {
+        const cartItems = JSON.parse(
+          localStorage.getItem(
+            "qcsCart"
+          ) || "[]"
+        );
 
-    const cartItems = JSON.parse(
-      localStorage.getItem("qcsCart") || "[]"
-    );
+        const storedUser =
+          localStorage.getItem(
+            "qcsUser"
+          );
 
-   const storedUser = localStorage.getItem("qcsUser");
+        const userData = storedUser
+          ? JSON.parse(storedUser)
+          : null;
 
-const userData = storedUser
-  ? JSON.parse(storedUser)
-  : null;
-if (!isLoggedIn) {
+        if (!isLoggedIn) {
 
-  alert("Please login first");
+          alert(
+            "Please login first"
+          );
 
-  return;
+          return;
 
-}
-    await addDoc(collection(db, "orders"), {
+        }
 
-      userId: auth.currentUser?.uid,
+        /* SAVE ORDER */
+        await addDoc(
+          collection(db, "orders"),
+          {
 
-      customerName:
- `${firstName || userData?.firstName || ""} ${lastName || userData?.lastName || ""}`,
-email: email || auth.currentUser?.email,
-phone: phone || userData?.phone || "",
-      items: cartItems,
+            userId:
+              auth.currentUser?.uid,
 
-      totalAmount: total,
+            customerName:
+              `${firstName || userData?.firstName || ""} ${lastName || userData?.lastName || ""}`,
 
-      paymentStatus: "Paid",
+            email:
+              email ||
+              auth.currentUser?.email,
 
-      orderStatus: "Processing",
+            phone:
+              phone ||
+              userData?.phone ||
+              "",
 
-      createdAt: serverTimestamp(),
+            address:
+              address ||
+              userData?.address ||
+              "",
 
-    });
+            items:
+              cartItems,
 
-    localStorage.removeItem("qcsCart");
+            totalAmount:
+              total,
 
-    navigate("/order-success");
+            paymentStatus:
+              "Paid",
 
-  } catch (error: any) {
+            orderStatus:
+              "Processing",
 
-  console.error(error);
+            createdAt:
+              serverTimestamp(),
 
-  alert(error.message);
+          }
+        );
 
-}
+        /* SEND ORDER EMAIL */
+        await fetch(
+          "http://localhost:5000/api/send-order-email",
+          {
 
-};
+            method: "POST",
 
-return (
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
 
-  <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#050816] to-[#0f172a] text-white">
+            body: JSON.stringify({
 
-    <Navbar />
+              email:
+                email ||
+                userData?.email,
 
-    <section className="max-w-5xl mx-auto px-6 py-10">
+              customerName:
+                firstName ||
+                userData?.firstName ||
+                "Customer",
 
-      <h1 className="text-5xl font-bold text-cyan-400 mb-10">
+              service:
+                cartItems?.[0] ||
+                "SSL Security",
 
-        Checkout
+              amount:
+                total,
 
-      </h1>
+            }),
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          }
+        );
 
-        {/* BILLING DETAILS */}
-<div className="bg-[#081028] border border-cyan-900/20 rounded-3xl p-8">
+        /* CLEAR CART */
+        localStorage.removeItem(
+          "qcsCart"
+        );
 
-  <h2 className="text-2xl font-bold mb-8">
-    Billing Details
-  </h2>
+        /* SUCCESS PAGE */
+        navigate(
+          "/order-success"
+        );
 
-  <div className="space-y-5">
- <input
-  type="text"
-  placeholder="First Name"
-  value={firstName}
-  onChange={(e) =>
-    setFirstName(e.target.value)
-  }
-  className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
-/>
-<input
-  type="text"
-  placeholder="Last Name"
-  value={lastName}
-  onChange={(e) =>
-    setLastName(e.target.value)
-  }
-  className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
-  />
+      } catch (error: any) {
 
-  <input
-    type="email"
-    placeholder="Email Address"
-    value={email}
-    onChange={(e) => setEmail(e.target.value)}
-    className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
-  />
+        console.error(error);
 
-  <input
-    type="tel"
-    placeholder="Phone Number"
-    value={phone}
-    onChange={(e) => setPhone(e.target.value)}
-    className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
-  />
+        alert(
+          "Payment failed. Please try again."
+        );
 
-  <textarea
-    placeholder="Billing Address"
-    rows={4}
-    value={address}
-    onChange={(e) => setAddress(e.target.value)}
-    className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
-  ></textarea>
-    </div>
+      }
 
-</div>
+    };
 
-        {/* ORDER SUMMARY */}
-        <div className="bg-[#081028] border border-cyan-900/20 rounded-3xl p-8">
+  return (
 
-          <h2 className="text-2xl font-bold mb-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#050816] to-[#0f172a] text-white">
 
-            Order Summary
+      <Navbar />
 
-          </h2>
+      <section className="max-w-5xl mx-auto px-6 py-10">
 
-          <div className="space-y-5">
+        <h1 className="text-5xl font-bold text-cyan-400 mb-10">
 
-            {Object.entries(groupedItems).map(
-              ([item, qty]: any) => (
+          Checkout
 
-                <div
-                  key={item}
-                  className="flex justify-between border-b border-cyan-900/10 pb-4"
-                >
+        </h1>
 
-                  <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
 
-                    <p className="font-semibold">
+          {/* BILLING DETAILS */}
+          <div className="bg-[#081028] border border-cyan-900/20 rounded-3xl p-8">
 
-                      {item}
+            <h2 className="text-2xl font-bold mb-8">
 
-                    </p>
+              Billing Details
 
-                    <div className="flex items-center gap-3 mt-2">
-
-                      <span className="text-sm text-gray-300">
-                        Quantity:
-                      </span>
-
-                      <div className="flex items-center gap-2">
-
-                        {/* MINUS */}
-                        <button
-                          onClick={() => {
-
-                            let updatedCart = [...cartItems];
-
-                            const index = updatedCart.indexOf(item);
-
-                            if (index > -1) {
-
-                              updatedCart.splice(index, 1);
-
-                            }
-
-                            localStorage.setItem(
-                              "qcsCart",
-                              JSON.stringify(updatedCart)
-                            );
-
-                            window.location.reload();
-
-                          }}
-                          className="text-red-400 hover:text-red-500 text-lg font-bold cursor-pointer transition"
-                        >
-
-                          -
-
-                        </button>
-
-                        {/* NUMBER */}
-                        <span className="text-cyan-400 font-semibold min-w-[20px] text-center">
-
-                          {qty}
-
-                        </span>
-
-                        {/* PLUS */}
-                        <button
-                          onClick={() => {
-
-                            const updatedCart = [...cartItems, item];
-
-                            localStorage.setItem(
-                              "qcsCart",
-                              JSON.stringify(updatedCart)
-                            );
-
-                            window.location.reload();
-
-                          }}
-                          className="text-cyan-400 hover:text-cyan-300 text-lg font-bold cursor-pointer transition"
-                        >
-
-                          +
-
-                        </button>
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                  <p className="font-bold text-cyan-400">
-
-                    ₹{servicePrices[item] * qty}
-
-                  </p>
-
-                </div>
-
-              )
-            )}
-
-          </div>
-
-          <div className="flex justify-between items-center mt-10 text-2xl font-bold">
-
-            <span>Total</span>
-
-            <span className="text-cyan-400">
-
-              ₹{total}
-
-            </span>
-
-          </div>
-
-          <button
-            onClick={handleProceedPayment}
-            className="w-full mt-10 bg-cyan-500 hover:bg-cyan-600 text-black py-4 rounded-2xl font-bold text-lg transition duration-300 cursor-pointer"
-          >
-
-            Proceed To Payment
-
-          </button>
-
-        </div>
-
-      </div>
-
-      {/* PAYMENT SECTION */}
-      {showPayment && (
-
-        <div
-          ref={paymentRef}
-          className="mt-24 bg-[#081028] border border-cyan-900/20 rounded-3xl p-10 animate-fadeIn"
-        >
-
-          <h2 className="text-4xl font-bold text-cyan-400 mb-10">
-
-            Payment Details
-
-          </h2>
-
-          <div className="grid md:grid-cols-2 gap-10">
+            </h2>
 
             <div className="space-y-5">
 
               <input
                 type="text"
-                placeholder="Card Holder Name"
+                placeholder="First Name"
+                value={firstName}
+                onChange={(e) =>
+                  setFirstName(
+                    e.target.value
+                  )
+                }
                 className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
               />
 
               <input
                 type="text"
-                placeholder="Card Number"
+                placeholder="Last Name"
+                value={lastName}
+                onChange={(e) =>
+                  setLastName(
+                    e.target.value
+                  )
+                }
                 className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
               />
 
-              <div className="grid grid-cols-2 gap-5">
+              <input
+                type="email"
+                placeholder="Email Address"
+                value={email}
+                onChange={(e) =>
+                  setEmail(
+                    e.target.value
+                  )
+                }
+                className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
+              />
 
-                <input
-                  type="text"
-                  placeholder="MM/YY"
-                  className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
-                />
+              <input
+                type="tel"
+                placeholder="Phone Number"
+                value={phone}
+                onChange={(e) =>
+                  setPhone(
+                    e.target.value
+                  )
+                }
+                className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
+              />
 
-                <input
-                  type="password"
-                  placeholder="CVV"
-                  className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
-                />
-
-              </div>
+              <textarea
+                placeholder="Billing Address"
+                rows={4}
+                value={address}
+                onChange={(e) =>
+                  setAddress(
+                    e.target.value
+                  )
+                }
+                className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
+              ></textarea>
 
             </div>
 
-            <div className="flex flex-col justify-center">
+          </div>
 
-              <div className="bg-[#0f172a] rounded-3xl p-8">
+          {/* ORDER SUMMARY */}
+          <div className="bg-[#081028] border border-cyan-900/20 rounded-3xl p-8">
 
-                <h3 className="text-2xl font-bold mb-6">
+            <h2 className="text-2xl font-bold mb-8">
 
-                  Final Amount
+              Order Summary
 
-                </h3>
+            </h2>
 
-                <p className="text-5xl font-extrabold text-cyan-400">
+            <div className="space-y-5">
 
-                  ₹{total}
+              {Object.entries(groupedItems).map(
+                ([item, qty]: any) => (
 
-                </p>
+                  <div
+                    key={item}
+                    className="flex justify-between border-b border-cyan-900/10 pb-4"
+                  >
 
-                <button
-                  onClick={handleCompletePayment}
-                  className="w-full mt-10 bg-cyan-500 hover:bg-cyan-600 text-black py-4 rounded-2xl font-bold text-lg transition cursor-pointer"
-                >
+                    <div>
 
-                  Complete Payment
+                      <p className="font-semibold">
 
-                </button>
+                        {item}
+
+                      </p>
+
+                      <div className="flex items-center gap-3 mt-2">
+
+                        <span className="text-sm text-gray-300">
+
+                          Quantity:
+
+                        </span>
+
+                        <div className="flex items-center gap-2">
+
+                          {/* MINUS */}
+                          <button
+                            onClick={() => {
+
+                              let updatedCart = [
+                                ...cartItems,
+                              ];
+
+                              const index =
+                                updatedCart.indexOf(
+                                  item
+                                );
+
+                              if (index > -1) {
+
+                                updatedCart.splice(
+                                  index,
+                                  1
+                                );
+
+                              }
+
+                              localStorage.setItem(
+                                "qcsCart",
+                                JSON.stringify(
+                                  updatedCart
+                                )
+                              );
+
+                              window.location.reload();
+
+                            }}
+                            className="text-red-400 hover:text-red-500 text-lg font-bold cursor-pointer transition"
+                          >
+
+                            -
+
+                          </button>
+
+                          {/* QTY */}
+                          <span className="text-cyan-400 font-semibold min-w-[20px] text-center">
+
+                            {qty}
+
+                          </span>
+
+                          {/* PLUS */}
+                          <button
+                            onClick={() => {
+
+                              const updatedCart = [
+                                ...cartItems,
+                                item,
+                              ];
+
+                              localStorage.setItem(
+                                "qcsCart",
+                                JSON.stringify(
+                                  updatedCart
+                                )
+                              );
+
+                              window.location.reload();
+
+                            }}
+                            className="text-cyan-400 hover:text-cyan-300 text-lg font-bold cursor-pointer transition"
+                          >
+
+                            +
+
+                          </button>
+
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                    <p className="font-bold text-cyan-400">
+
+                      ₹
+                      {servicePrices[item] * qty}
+
+                    </p>
+
+                  </div>
+
+                )
+              )}
+
+            </div>
+
+            <div className="flex justify-between items-center mt-10 text-2xl font-bold">
+
+              <span>Total</span>
+
+              <span className="text-cyan-400">
+
+                ₹{total}
+
+              </span>
+
+            </div>
+
+            <button
+              onClick={handleProceedPayment}
+              className="w-full mt-10 bg-cyan-500 hover:bg-cyan-600 text-black py-4 rounded-2xl font-bold text-lg transition duration-300 cursor-pointer"
+            >
+
+              Proceed To Payment
+
+            </button>
+
+          </div>
+
+        </div>
+
+        {/* PAYMENT */}
+        {showPayment && (
+
+          <div
+            ref={paymentRef}
+            className="mt-24 bg-[#081028] border border-cyan-900/20 rounded-3xl p-10 animate-fadeIn"
+          >
+
+            <h2 className="text-4xl font-bold text-cyan-400 mb-10">
+
+              Payment Details
+
+            </h2>
+
+            <div className="grid md:grid-cols-2 gap-10">
+
+              <div className="space-y-5">
+
+                <input
+                  type="text"
+                  placeholder="Card Holder Name"
+                  className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
+                />
+
+                <input
+                  type="text"
+                  placeholder="Card Number"
+                  className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
+                />
+
+                <div className="grid grid-cols-2 gap-5">
+
+                  <input
+                    type="text"
+                    placeholder="MM/YY"
+                    className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
+                  />
+
+                  <input
+                    type="password"
+                    placeholder="CVV"
+                    className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-5 py-4 outline-none"
+                  />
+
+                </div>
+
+              </div>
+
+              <div className="flex flex-col justify-center">
+
+                <div className="bg-[#0f172a] rounded-3xl p-8">
+
+                  <h3 className="text-2xl font-bold mb-6">
+
+                    Final Amount
+
+                  </h3>
+
+                  <p className="text-5xl font-extrabold text-cyan-400">
+
+                    ₹{total}
+
+                  </p>
+
+                  <button
+                    onClick={handleCompletePayment}
+                    className="w-full mt-10 bg-cyan-500 hover:bg-cyan-600 text-black py-4 rounded-2xl font-bold text-lg transition cursor-pointer"
+                  >
+
+                    Complete Payment
+
+                  </button>
+
+                </div>
 
               </div>
 
@@ -487,14 +637,14 @@ return (
 
           </div>
 
-        </div>
+        )}
 
-      )}
+      </section>
 
-    </section>
+    </div>
 
-  </div>
+  );
 
-);
 }
+
 export default Checkout;
