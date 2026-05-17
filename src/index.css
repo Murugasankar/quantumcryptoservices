@@ -1,89 +1,155 @@
 @import "tailwindcss";
-/* QCS Cyber Dissolve Animation */
+
+/* =========================
+   QCS REALISTIC CYBER ANIMATION
+========================= */
 
 @keyframes cyberFlyIn {
 
   0% {
-    transform:
-      translate(420px, 60px)
-      rotate(540deg)
-      scale(0.1);
 
     opacity: 0;
-    filter: blur(12px);
+
+    transform:
+      translateX(420px)
+      translateY(-45px)
+      rotate(180deg)
+      scale(0.2);
+
+    filter: blur(10px);
+
   }
 
   20% {
-    transform:
-      translate(300px, -30px)
-      rotate(400deg)
-      scale(0.4);
 
-    opacity: 0.3;
-    filter: blur(8px);
+    opacity: 0.35;
+
+    transform:
+      translateX(300px)
+      translateY(28px)
+      rotate(120deg)
+      scale(0.5);
+
+    filter: blur(7px);
+
   }
 
   40% {
-    transform:
-      translate(180px, 25px)
-      rotate(240deg)
-      scale(0.7);
 
-    opacity: 0.6;
-    filter: blur(4px);
+    opacity: 0.7;
+
+    transform:
+      translateX(170px)
+      translateY(-16px)
+      rotate(65deg)
+      scale(0.82);
+
+    filter: blur(3px);
+
   }
 
   60% {
-    transform:
-      translate(80px, -15px)
-      rotate(120deg)
-      scale(1.05);
-
-    opacity: 0.9;
-    filter: blur(1px);
-  }
-
-  80% {
-    transform:
-      translate(-10px, 8px)
-      rotate(-20deg)
-      scale(1.02);
 
     opacity: 1;
-    filter: blur(0px);
+
+    transform:
+      translateX(55px)
+      translateY(10px)
+      rotate(18deg)
+      scale(1.06);
+
+    filter: blur(1px);
+
+  }
+
+  78% {
+
+    opacity: 1;
+
+    transform:
+      translateX(-8px)
+      translateY(-5px)
+      rotate(-4deg)
+      scale(1.02);
+
+    filter: blur(0);
+
+  }
+
+  90% {
+
+    opacity: 1;
+
+    transform:
+      translateX(4px)
+      translateY(2px)
+      rotate(1deg)
+      scale(1.005);
+
   }
 
   100% {
+
+    opacity: 1;
+
     transform:
-      translate(0px, 0px)
+      translateX(0)
+      translateY(0)
       rotate(0deg)
       scale(1);
 
-    opacity: 1;
-    filter: blur(0px);
+    filter: blur(0);
+
   }
 
 }
 
+/* LETTER BASE */
+.animate-q,
+.animate-c,
+.animate-s {
+
+  display: inline-block;
+
+  opacity: 0;
+
+  animation-name: cyberFlyIn;
+
+  animation-duration: 3.00s;
+
+  animation-timing-function: cubic-bezier(
+    0.22,
+    1,
+    0.36,
+    1
+  );
+
+  animation-fill-mode: forwards;
+
+  will-change:
+    transform,
+    opacity,
+    filter;
+
+}
 
 /* Q */
 .animate-q {
-  display: inline-block;
-  animation: cyberFlyIn 3s ease forwards;
-}
 
+  animation-delay: 0s;
+
+}
 
 /* C */
 .animate-c {
-  display: inline-block;
-  animation: cyberFlyIn 3s ease forwards;
-  animation-delay: 0.8s;
-}
 
+  animation-delay: 0.22s;
+
+}
 
 /* S */
 .animate-s {
-  display: inline-block;
-  animation: cyberFlyIn 3s ease forwards;
-  animation-delay: 1.6s;
+
+  animation-delay: 0.44s;
+
 }
