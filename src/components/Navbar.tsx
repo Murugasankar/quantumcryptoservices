@@ -376,6 +376,8 @@ function Navbar() {
         </div>
 
         {/* MOBILE MENU BUTTON */}
+
+
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="lg:hidden flex flex-col gap-1 ml-3"
@@ -402,7 +404,134 @@ function Navbar() {
         </button>
 
       </div>
+{/* MOBILE MENU */}
+{menuOpen && (
 
+  <div className="lg:hidden absolute top-full left-0 w-full bg-[#081028] border-t border-cyan-900/30 z-[9999] shadow-2xl">
+
+    <div className="flex flex-col px-6 py-6 gap-5">
+
+      {/* HOME */}
+      <Link
+        to="/"
+        onClick={() => setMenuOpen(false)}
+        className={`text-lg font-semibold transition duration-300 ${
+          location.pathname === "/"
+            ? "text-cyan-400"
+            : "text-white hover:text-cyan-400"
+        }`}
+      >
+
+        Home
+
+      </Link>
+
+      {/* SERVICES */}
+      <Link
+        to="/services"
+        onClick={() => setMenuOpen(false)}
+        className={`text-lg font-semibold transition duration-300 ${
+          location.pathname === "/services"
+            ? "text-cyan-400"
+            : "text-white hover:text-cyan-400"
+        }`}
+      >
+
+        Services
+
+      </Link>
+
+      {/* PRICING */}
+      <Link
+        to="/pricing"
+        onClick={() => setMenuOpen(false)}
+        className={`text-lg font-semibold transition duration-300 ${
+          location.pathname === "/pricing"
+            ? "text-cyan-400"
+            : "text-white hover:text-cyan-400"
+        }`}
+      >
+
+        Pricing
+
+      </Link>
+
+      {/* CONTACT */}
+      <Link
+        to="/contact"
+        onClick={() => setMenuOpen(false)}
+        className={`text-lg font-semibold transition duration-300 ${
+          location.pathname === "/contact"
+            ? "text-cyan-400"
+            : "text-white hover:text-cyan-400"
+        }`}
+      >
+
+        Contact
+
+      </Link>
+
+      {/* CART BUTTON */}
+      <button
+        onClick={() => {
+
+          navigate("/checkout");
+
+          setMenuOpen(false);
+
+        }}
+        className="w-full bg-cyan-500 hover:bg-cyan-600 text-black py-3 rounded-2xl font-bold transition duration-300"
+      >
+
+        Cart ({cartItems.length})
+
+      </button>
+
+      {/* AUTH */}
+      {user ? (
+
+        <button
+          onClick={handleLogout}
+          className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-2xl font-bold transition duration-300"
+        >
+
+          Logout
+
+        </button>
+
+      ) : (
+
+        <div className="flex flex-col gap-3">
+
+          <Link
+            to="/login"
+            onClick={() => setMenuOpen(false)}
+            className="w-full border border-cyan-500 text-center py-3 rounded-2xl font-semibold text-white"
+          >
+
+            Login
+
+          </Link>
+
+          <Link
+            to="/register"
+            onClick={() => setMenuOpen(false)}
+            className="w-full bg-cyan-500 hover:bg-cyan-600 text-black text-center py-3 rounded-2xl font-bold transition duration-300"
+          >
+
+            Register
+
+          </Link>
+
+        </div>
+
+      )}
+
+    </div>
+
+  </div>
+
+)}
     </nav>
 
   );
