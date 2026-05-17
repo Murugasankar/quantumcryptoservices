@@ -1,6 +1,7 @@
 import Navbar from "../components/Navbar";
 import ParticlesBackground from "../components/ParticlesBackground";
 import { motion } from "framer-motion";
+import SSLChecker from "../components/SSLChecker";
 
 function Home() {
   return (
@@ -174,86 +175,22 @@ function Home() {
       </section>
 
       {/* SSL CHECKER */}
+{/* REAL SSL CHECKER */}
 <section className="px-6 md:px-20 py-24">
 
   <h2 className="text-5xl font-bold text-cyan-400 text-center">
     SSL Certificate Checker
   </h2>
 
-  <p className="text-center text-gray-300 text-2xl mt-8">
+  <p className="text-center text-gray-300 text-2xl mt-8 max-w-4xl mx-auto leading-relaxed">
 
-    Analyze SSL certificate configuration
-    and security posture for any public domain.
+    Analyze real-time SSL certificate configuration,
+    HTTPS security posture, TLS support and certificate grade
+    for any public domain.
 
   </p>
 
-  <div className="bg-[#081028] border border-cyan-900/30 rounded-3xl p-10 mt-16 max-w-3xl mx-auto">
-
-    <input
-      type="text"
-      placeholder="Enter domain name (example.com)"
-      className="w-full bg-[#0f172a] border border-cyan-900/30 rounded-2xl px-6 py-5 text-xl outline-none focus:border-cyan-400"
-    />
-
-    <button
-      className="mt-8 bg-cyan-500 hover:bg-cyan-600 text-black px-10 py-4 rounded-2xl font-bold text-lg transition"
-    >
-
-      Check SSL
-
-    </button>
-
-    {/* RESULT CARD */}
-    <div className="mt-10 bg-[#0f172a] rounded-2xl p-8 border border-cyan-900/20">
-
-      <h3 className="text-2xl font-bold text-cyan-400 mb-6">
-
-        SSL Report
-
-      </h3>
-
-      <div className="space-y-4 text-gray-300 text-lg">
-
-        <p>
-          Domain:
-          <span className="text-white ml-2">
-            example.com
-          </span>
-        </p>
-
-        <p>
-          SSL Status:
-          <span className="text-green-400 ml-2">
-            Secure
-          </span>
-        </p>
-
-        <p>
-          Issuer:
-          <span className="text-white ml-2">
-            Let's Encrypt
-          </span>
-        </p>
-
-        <p>
-          Expiry Date:
-          <span className="text-white ml-2">
-            Dec 12, 2026
-          </span>
-        </p>
-
-        <p>
-          TLS Version:
-          <span className="text-white ml-2">
-            TLS 1.3
-          </span>
-        </p>
-
-      </div>
-
-    </div>
-
-  </div>
+  <SSLChecker />
 
 </section>
 
