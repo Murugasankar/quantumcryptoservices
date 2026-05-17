@@ -231,6 +231,8 @@ const recentActivities = orders
   });
   return (
 
+    
+
     <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#050816] to-[#0f172a] text-white">
 
       <Navbar />
@@ -350,6 +352,7 @@ const recentActivities = orders
         </h3>
 
       </div>
+      
 
       <div className="bg-[#081028] rounded-3xl p-8 border border-cyan-900/20">
 
@@ -390,7 +393,19 @@ const recentActivities = orders
           {uniqueCustomers}
 
         </h3>
+<div className="bg-[#081028] p-6 rounded-2xl">
 
+  <h3 className="text-gray-400">
+    Processing Orders
+  </h3>
+
+  <p className="text-4xl font-bold text-cyan-400 mt-3">
+
+    {processingOrders}
+
+  </p>
+
+</div>
       </div>
 
     </div>
